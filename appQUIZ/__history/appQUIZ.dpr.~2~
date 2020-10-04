@@ -1,0 +1,16 @@
+program appQUIZ;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  FMain in 'src\FMain.pas' {Form3},
+  FQuiz in 'src\FQuiz.pas' {frmQuiz};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TForm3, Form3);
+  Application.CreateForm(TfrmQuiz, frmQuiz);
+  Application.Run;
+end.

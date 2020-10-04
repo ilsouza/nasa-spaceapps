@@ -1,0 +1,15 @@
+object dmQuiz: TdmQuiz
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Height = 363
+  Width = 420
+  object qryQuizGetItem: TFDQuery
+    Left = 144
+    Top = 48
+  end
+  object qryQuizPostItem: TFDQuery
+    Left = 144
+    Top = 120
+  end
+end

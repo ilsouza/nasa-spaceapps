@@ -1,0 +1,14 @@
+object dmUsers: TdmUsers
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 260
+  Width = 365
+  object qryUsersGetItem: TFDQuery
+    Left = 144
+    Top = 48
+  end
+  object qryUsersPostItem: TFDQuery
+    Left = 144
+    Top = 120
+  end
+end

@@ -1,0 +1,298 @@
+object frmQuiz: TfrmQuiz
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 775
+  ClientWidth = 470
+  Position = ScreenCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object Layout1: TLayout
+    Align = Top
+    Size.Width = 470.000000000000000000
+    Size.Height = 81.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object lblYourName: TLabel
+      Align = Top
+      StyledSettings = [Family, FontColor]
+      Size.Width = 470.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      Text = 'Seu nome'
+      TabOrder = 1
+    end
+    object lblQuizName: TLabel
+      Align = Top
+      StyledSettings = [Family, FontColor]
+      Position.Y = 33.000000000000000000
+      Size.Width = 470.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      Text = 'NOME DO QUIZ'
+      TabOrder = 0
+    end
+  end
+  object Layout2: TLayout
+    Position.Y = 73.000000000000000000
+    Size.Width = 470.000000000000000000
+    Size.Height = 656.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object memQuestion: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      Align = Top
+      Margins.Left = 10.000000000000000000
+      Margins.Top = 10.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.X = 10.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 450.000000000000000000
+      Size.Height = 129.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Viewport.Width = 446.000000000000000000
+      Viewport.Height = 125.000000000000000000
+    end
+    object Layout3: TLayout
+      Align = Top
+      Position.Y = 149.000000000000000000
+      Size.Width = 470.000000000000000000
+      Size.Height = 308.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object GroupBox1: TGroupBox
+        Align = Client
+        Size.Width = 470.000000000000000000
+        Size.Height = 308.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object rbOP1: TRadioButton
+          Align = Top
+          StyledSettings = [Family, Style, FontColor]
+          Margins.Left = 20.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 20.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 20.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 430.000000000000000000
+          Size.Height = 60.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 41
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.WordWrap = True
+        end
+        object rbOP4: TRadioButton
+          Align = Top
+          StyledSettings = [Family, Style, FontColor]
+          Margins.Left = 20.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 20.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 20.000000000000000000
+          Position.Y = 215.000000000000000000
+          Size.Width = 430.000000000000000000
+          Size.Height = 60.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 40
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.WordWrap = True
+        end
+        object rbOP3: TRadioButton
+          Align = Top
+          StyledSettings = [Family, Style, FontColor]
+          Margins.Left = 20.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 20.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 20.000000000000000000
+          Position.Y = 145.000000000000000000
+          Size.Width = 430.000000000000000000
+          Size.Height = 60.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 39
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.WordWrap = True
+        end
+        object rbOP2: TRadioButton
+          Align = Top
+          StyledSettings = [Family, Style, FontColor]
+          Margins.Left = 20.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 20.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 20.000000000000000000
+          Position.Y = 75.000000000000000000
+          Size.Width = 430.000000000000000000
+          Size.Height = 60.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 38
+          TextSettings.Font.Size = 14.000000000000000000
+          TextSettings.WordWrap = True
+        end
+      end
+    end
+    object Layout4: TLayout
+      Align = Top
+      Position.Y = 457.000000000000000000
+      Size.Width = 470.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object edtScore: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Left
+        TabOrder = 0
+        Text = '1 / 10'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Center
+        Position.X = 5.000000000000000000
+        Position.Y = 5.000000000000000000
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 129.000000000000000000
+        Size.Height = 38.000000000000000000
+        Size.PlatformDefault = False
+        StyledSettings = [Family, FontColor]
+      end
+      object btnAnswer: TButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 182.000000000000000000
+        Size.Height = 38.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = 'Answer'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        OnClick = btnAnswerClick
+      end
+      object btnByPass: TButton
+        Align = Right
+        StyledSettings = [Family, FontColor]
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 336.000000000000000000
+        Position.Y = 5.000000000000000000
+        Size.Width = 129.000000000000000000
+        Size.Height = 38.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        Text = 'bypass'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        OnClick = btnByPassClick
+      end
+    end
+    object Layout5: TLayout
+      Align = Top
+      Position.Y = 505.000000000000000000
+      Size.Width = 470.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object btnPior: TButton
+        Align = Left
+        Size.Width = 145.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = 'arrowlefttoolbutton'
+        TabOrder = 1
+        Text = 'btnPior'
+      end
+      object btnNext: TButton
+        Align = Right
+        Position.X = 325.000000000000000000
+        Size.Width = 145.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = 'arrowrighttoolbutton'
+        TabOrder = 0
+        Text = 'Button1'
+      end
+      object btnBackMain: TButton
+        Align = Client
+        StyledSettings = [Family]
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 170.000000000000000000
+        Size.Height = 38.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = 'BACK'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        OnClick = btnBackMainClick
+      end
+    end
+  end
+  object BindSourceDB1: TBindSourceDB
+    DataSet = dm.mtabQuestions
+    ScopeMappings = <>
+    Left = 224
+    Top = 376
+  end
+  object BindingsList1: TBindingsList
+    Methods = <>
+    OutputConverters = <>
+    Left = 20
+    Top = 5
+    object LinkPropertyToFieldLinesText: TLinkPropertyToField
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      FieldName = 'que_description'
+      Component = memQuestion
+      ComponentProperty = 'Lines.Text'
+    end
+    object LinkPropertyToFieldText: TLinkPropertyToField
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      FieldName = 'que_01_desc'
+      Component = rbOP1
+      ComponentProperty = 'Text'
+    end
+    object LinkPropertyToFieldText2: TLinkPropertyToField
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      FieldName = 'que_02_desc'
+      Component = rbOP2
+      ComponentProperty = 'Text'
+    end
+    object LinkPropertyToFieldText3: TLinkPropertyToField
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      FieldName = 'que_03_desc'
+      Component = rbOP3
+      ComponentProperty = 'Text'
+    end
+    object LinkPropertyToFieldText4: TLinkPropertyToField
+      Category = 'Quick Bindings'
+      DataSource = BindSourceDB1
+      FieldName = 'que_04_desc'
+      Component = rbOP4
+      ComponentProperty = 'Text'
+    end
+  end
+end

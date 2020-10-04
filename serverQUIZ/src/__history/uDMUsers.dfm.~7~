@@ -1,0 +1,23 @@
+object dmUsers: TdmUsers
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Height = 260
+  Width = 365
+  object qryUsersGetItem: TFDQuery
+    Connection = dm.conQuiz
+    SQL.Strings = (
+      'select * from users where usr_id = :id')
+    Left = 144
+    Top = 48
+    ParamData = <
+      item
+        Name = 'ID'
+        ParamType = ptInput
+      end>
+  end
+  object qryUsersPostItem: TFDQuery
+    Left = 144
+    Top = 120
+  end
+end

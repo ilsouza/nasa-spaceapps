@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{F6E5D907-4EDE-446F-A7DC-025336ABCE2F}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="appQUIZ\appQUIZ.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="serverQUIZ\serverquiz.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="appQUIZ">
+        <MSBuild Projects="appQUIZ\appQUIZ.dproj"/>
+    </Target>
+    <Target Name="appQUIZ:Clean">
+        <MSBuild Projects="appQUIZ\appQUIZ.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="appQUIZ:Make">
+        <MSBuild Projects="appQUIZ\appQUIZ.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="serverquiz">
+        <MSBuild Projects="serverQUIZ\serverquiz.dproj"/>
+    </Target>
+    <Target Name="serverquiz:Clean">
+        <MSBuild Projects="serverQUIZ\serverquiz.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="serverquiz:Make">
+        <MSBuild Projects="serverQUIZ\serverquiz.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="appQUIZ;serverquiz"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="appQUIZ:Clean;serverquiz:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="appQUIZ:Make;serverquiz:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

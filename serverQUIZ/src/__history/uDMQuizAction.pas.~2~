@@ -1,0 +1,27 @@
+unit uDMQuizAction;
+
+interface
+
+uses
+  System.SysUtils, System.Classes;
+
+type
+  TdmQuizActions = class(TDataModule)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dmQuizActions: TdmQuizActions;
+
+implementation
+
+{%CLASSGROUP 'System.Classes.TPersistent'}
+
+uses uDM;
+
+{$R *.dfm}
+
+end.

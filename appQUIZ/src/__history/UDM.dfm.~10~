@@ -1,0 +1,90 @@
+object dm: Tdm
+  OldCreateOrder = False
+  Height = 420
+  Width = 848
+  object emsConn: TEMSProvider
+    ApiVersion = '2'
+    URLHost = '192.168.100.6'
+    URLPort = 8080
+    Left = 64
+    Top = 48
+  end
+  object EMSDataSetResource1: TEMSDataSetResource
+    Left = 696
+    Top = 56
+  end
+  object getQuiz: TBackendEndpoint
+    Provider = emsConn
+    Params = <>
+    Resource = 'http://localhost:8080/resQuiz'
+    Response = respQuiz
+    Left = 288
+    Top = 144
+  end
+  object RESTClient1: TRESTClient
+    Params = <>
+    Left = 696
+    Top = 192
+  end
+  object RESTRequest1: TRESTRequest
+    Client = RESTClient1
+    Params = <>
+    Response = respQuiz
+    Left = 696
+    Top = 264
+  end
+  object respQuiz: TRESTResponse
+    ContentType = 'application/json'
+    Left = 288
+    Top = 208
+  end
+  object getQuestions: TBackendEndpoint
+    Provider = emsConn
+    Params = <>
+    Resource = 'http://localhost:8080/resQuestions'
+    Response = respQuestions
+    Left = 376
+    Top = 144
+  end
+  object respQuestions: TRESTResponse
+    ContentType = 'application/json'
+    Left = 376
+    Top = 208
+  end
+  object postQuizAction: TBackendEndpoint
+    Provider = emsConn
+    Method = rmPOST
+    Params = <>
+    Resource = 'http://localhost:8080/resQuizAction'
+    Response = respQuizAction
+    Left = 496
+    Top = 144
+  end
+  object respQuizAction: TRESTResponse
+    ContentType = 'application/json'
+    Left = 496
+    Top = 208
+  end
+  object getUsers: TBackendEndpoint
+    Provider = emsConn
+    Params = <>
+    Resource = 'http://localhost:8080/resUsers'
+    Response = respUsers
+    Left = 64
+    Top = 144
+  end
+  object respUsers: TRESTResponse
+    ContentType = 'application/json'
+    Left = 64
+    Top = 208
+  end
+  object postUser: TBackendEndpoint
+    Provider = emsConn
+    Method = rmPOST
+    Params = <>
+    Resource = 'http://localhost:8080/resUsers'
+    Response = respUsers
+    Left = 136
+    Top = 144
+  end
+end

@@ -1,0 +1,5 @@
+object resQuiz: TresQuiz
+  OldCreateOrder = False
+  Height = 526
+  Width = 763
+end
