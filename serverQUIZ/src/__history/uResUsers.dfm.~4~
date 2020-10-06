@@ -1,5 +1,0 @@
-object resUsers: TresUsers
-  OldCreateOrder = False
-  Height = 327
-  Width = 452
-end

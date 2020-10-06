@@ -1,6 +1,0 @@
-object resQuestions: TresQuestions
-  OldCreateOrder = False
-  OnCreate = DataModuleCreate
-  Height = 300
-  Width = 600
-end
