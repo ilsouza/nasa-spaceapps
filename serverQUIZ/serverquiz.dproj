@@ -91,8 +91,8 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <DCC_UnitSearchPath>src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <DCC_DcuOutput>dcu</DCC_DcuOutput>
-        <DCC_BplOutput>bin</DCC_BplOutput>
+        <DCC_DcuOutput>out</DCC_DcuOutput>
+        <DCC_BplOutput>deploy\$(Platform)\$(Config)</DCC_BplOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
@@ -107,54 +107,54 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="rtl.dcp"/>
-        <DCCReference Include="emsserverapi.dcp"/>
         <DCCReference Include="dbrtl.dcp"/>
         <DCCReference Include="FireDAC.dcp"/>
         <DCCReference Include="FireDACCommonDriver.dcp"/>
         <DCCReference Include="FireDACCommon.dcp"/>
         <DCCReference Include="FireDACPgDriver.dcp"/>
-        <DCCReference Include="src\uResUsers.pas">
-            <Form>resUsers</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uDM.pas">
-            <Form>dm</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uDMUsers.pas">
-            <Form>dmUsers</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uDMQuiz.pas">
-            <Form>dmQuiz</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uDMQuestions.pas">
-            <Form>dmQuestions</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uDMQuizActions.pas">
-            <Form>dmQuizActions</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uResQuiz.pas">
-            <Form>resQuiz</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="src\uResQuestions.pas">
+        <DCCReference Include="emsserverapi.dcp"/>
+        <DCCReference Include="src\resources\uResQuestions.pas">
             <Form>resQuestions</Form>
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="src\uResQuizAction.pas">
+        <DCCReference Include="src\resources\uResQuiz.pas">
+            <Form>resQuiz</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\resources\uResQuizAction.pas">
             <Form>resQuizAction</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\resources\uResUsers.pas">
+            <Form>resUsers</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\uDM.pas">
+            <Form>dm</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\uDMQuestions.pas">
+            <Form>dmQuestions</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\uDMQuiz.pas">
+            <Form>dmQuiz</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\uDMQuizActions.pas">
+            <Form>dmQuizActions</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="src\services\uDMUsers.pas">
+            <Form>dmUsers</Form>
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
@@ -200,7 +200,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="bin\serverquiz.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="deploy\Win32\Debug\serverquiz.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>serverquiz.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

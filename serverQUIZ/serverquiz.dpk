@@ -30,22 +30,22 @@ package serverquiz;
 
 requires
   rtl,
-  emsserverapi,
   dbrtl,
   FireDAC,
   FireDACCommonDriver,
   FireDACCommon,
-  FireDACPgDriver;
+  FireDACPgDriver,
+  emsserverapi;
 
 contains
-  uResUsers in 'src\uResUsers.pas' {resUsers: TDataModule},
-  uDM in 'src\uDM.pas' {dm: TDataModule},
-  uDMUsers in 'src\uDMUsers.pas' {dmUsers: TDataModule},
-  uDMQuiz in 'src\uDMQuiz.pas' {dmQuiz: TDataModule},
-  uDMQuestions in 'src\uDMQuestions.pas' {dmQuestions: TDataModule},
-  uDMQuizActions in 'src\uDMQuizActions.pas' {dmQuizActions: TDataModule},
-  uResQuiz in 'src\uResQuiz.pas' {resQuiz: TDataModule},
-  uResQuestions in 'src\uResQuestions.pas' {resQuestions: TDataModule},
-  uResQuizAction in 'src\uResQuizAction.pas' {resQuizAction: TDataModule};
+  uResQuestions in 'src\resources\uResQuestions.pas' {resQuestions: TDataModule},
+  uResQuiz in 'src\resources\uResQuiz.pas' {resQuiz: TDataModule},
+  uResQuizAction in 'src\resources\uResQuizAction.pas' {resQuizAction: TDataModule},
+  uResUsers in 'src\resources\uResUsers.pas' {resUsers: TDataModule},
+  uDM in 'src\services\uDM.pas' {dm: TDataModule},
+  uDMQuestions in 'src\services\uDMQuestions.pas' {dmQuestions: TDataModule},
+  uDMQuiz in 'src\services\uDMQuiz.pas' {dmQuiz: TDataModule},
+  uDMQuizActions in 'src\services\uDMQuizActions.pas' {dmQuizActions: TDataModule},
+  uDMUsers in 'src\services\uDMUsers.pas' {dmUsers: TDataModule};
 
 end.
