@@ -1,0 +1,54 @@
+unit Service.Laboratory;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, REST.Backend.ServiceTypes, REST.Backend.EMSServices, System.JSON, REST.Client,
+  Data.Bind.Components, Data.Bind.ObjectScope, REST.Backend.EndPoint, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, REST.Response.Adapter, FireDAC.Stan.Async, FireDAC.DApt;
+
+type
+  TsrvServiceLaboratory = class(TDataModule)
+    backEndPointLaboratoryItem: TBackendEndpoint;
+    rRespLaboratoryItem: TRESTResponse;
+    rdsarLaboratoryItem: TRESTResponseDataSetAdapter;
+    tblLaboratoryItem: TFDMemTable;
+    tblLaboratoryItemunit_cname: TWideStringField;
+    tblLaboratoryItemunit_cphone1: TWideStringField;
+    tblLaboratoryItemunit_ccodcity: TWideStringField;
+    tblLaboratoryItemunit_ccep: TWideStringField;
+    backEndPointLabs: TBackendEndpoint;
+    rRespLabs: TRESTResponse;
+    rdsarLabs: TRESTResponseDataSetAdapter;
+    tblLabs: TFDMemTable;
+    tblLabslab_nid: TIntegerField;
+    tblLabslab_cname: TWideStringField;
+    tblLabslab_cemail: TWideStringField;
+    tblLabslab_cadminid: TWideStringField;
+    tblLabslab_cdbhost: TWideStringField;
+    tblLabslab_cdbname: TWideStringField;
+    tblLabslab_clogin: TWideStringField;
+    tblLabslab_cusername: TWideStringField;
+    tblLabslab_cdbpassword: TWideStringField;
+    tblLabslab_cdbport: TWideStringField;
+    tblLabslab_caccessurl: TWideStringField;
+    tblLaboratoryItemunit_nid: TIntegerField;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  srvServiceLaboratory: TsrvServiceLaboratory;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+uses UDM;
+
+{$R *.dfm}
+
+end.

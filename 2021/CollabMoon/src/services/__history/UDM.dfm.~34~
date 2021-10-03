@@ -1,0 +1,12 @@
+object dm: Tdm
+  OldCreateOrder = False
+  Height = 377
+  Width = 440
+  object emsLAPProvider: TEMSProvider
+    ApiVersion = '2'
+    URLHost = 'localhost'
+    URLPort = 8080
+    Left = 72
+    Top = 40
+  end
+end

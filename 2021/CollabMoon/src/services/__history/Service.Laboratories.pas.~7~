@@ -1,0 +1,63 @@
+unit Service.Laboratories;
+
+// EMS Resource Module
+
+interface
+
+uses
+  System.SysUtils, System.Classes, System.JSON, EMS.Services, EMS.ResourceAPI, EMS.ResourceTypes, REST.Backend.ServiceTypes,
+  REST.Client, Data.Bind.Components, Data.Bind.ObjectScope, REST.Backend.EndPoint, REST.Backend.EMSServices, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB,
+  REST.Response.Adapter, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+
+type
+  [ResourceName('resLaboratories')]
+  TsrvLaboratories = class(TDataModule)
+    BackEndpointLaboratories: TBackendEndpoint;
+    rRespLaboratories: TRESTResponse;
+    dtsLaboratories: TDataSource;
+    mtbLaboratories: TFDMemTable;
+    rdsaLaboratories: TRESTResponseDataSetAdapter;
+    mtbLaboratoriesunit_cname: TWideStringField;
+    mtbLaboratoriesunit_cphone1: TWideStringField;
+    mtbLaboratoriesunit_ccodcity: TWideStringField;
+    mtbLaboratoriesunit_ccep: TWideStringField;
+  published
+    procedure Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+    [ResourceSuffix('{item}')]
+    procedure GetItem(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+  end;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+uses UDM;
+
+{$R *.dfm}
+
+procedure TsrvLaboratories.Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+begin
+  // Sample code
+  AResponse.Body.SetValue(TJSONString.Create('resLaboratories'), True)
+end;
+
+procedure TsrvLaboratories.GetItem(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+var
+  LItem: string;
+begin
+  LItem := ARequest.Params.Values['item'];
+  // Sample code
+  AResponse.Body.SetValue(TJSONString.Create('resLaboratories ' + LItem), True)
+end;
+
+procedure Register;
+begin
+  RegisterResource(TypeInfo(TResLaboratoriesResource1));
+end;
+
+initialization
+  Register;
+end.
+
+

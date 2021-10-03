@@ -1,0 +1,48 @@
+unit Service.Login;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, REST.Backend.ServiceTypes, System.JSON, Data.Bind.Components,
+  Data.Bind.ObjectScope, REST.Client, REST.Backend.EMSServices, REST.Backend.EndPoint, UDM;
+
+type
+  TsrvServiceLogin = class(TDataModule)
+    backEndPointLogin: TBackendEndpoint;
+    rRespLogin: TRESTResponse;
+    backEndPointPassword: TBackendEndpoint;
+    rRespPassword: TRESTResponse;
+    backEndPointSendEmail: TBackendEndpoint;
+    rRespSendEmail: TRESTResponse;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure DataModuleDestroy(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    FModule : TDM;
+  end;
+
+var
+  srvServiceLogin: TsrvServiceLogin;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TsrvServiceLogin.DataModuleCreate(Sender: TObject);
+begin
+  if (FModule = nil) then
+  begin
+    FModule := Tdm.Create(Self);
+  end;
+end;
+
+procedure TsrvServiceLogin.DataModuleDestroy(Sender: TObject);
+begin
+  FModule.Free;
+end;
+
+end.

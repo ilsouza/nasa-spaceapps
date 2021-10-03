@@ -1,0 +1,37 @@
+unit Service.Laboratory;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, REST.Backend.ServiceTypes, REST.Backend.EMSServices, System.JSON, REST.Client,
+  Data.Bind.Components, Data.Bind.ObjectScope, REST.Backend.EndPoint, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  REST.Response.Adapter;
+
+type
+  TsrvServiceLaboratory = class(TDataModule)
+    backEndPointLaboratoryItem: TBackendEndpoint;
+    rRespLaboratoryItem: TRESTResponse;
+    rdsarLaboratoryItem: TRESTResponseDataSetAdapter;
+    tblLaboratoryItem: TFDMemTable;
+    tblLaboratoryItemunit_cname: TWideStringField;
+    tblLaboratoryItemunit_cphone1: TWideStringField;
+    tblLaboratoryItemunit_ccodcity: TWideStringField;
+    tblLaboratoryItemunit_ccep: TWideStringField;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  srvServiceLaboratory: TsrvServiceLaboratory;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+uses UDM;
+
+{$R *.dfm}
+
+end.

@@ -1,0 +1,16 @@
+object srvLaboratories: TsrvLaboratories
+  OldCreateOrder = False
+  Height = 300
+  Width = 600
+  object BackEndpointLaboratories: TBackendEndpoint
+    Params = <>
+    Resource = 'resLaboratories'
+    Response = rRespLaboratories
+    Left = 80
+    Top = 48
+  end
+  object rRespLaboratories: TRESTResponse
+    Left = 216
+    Top = 48
+  end
+end

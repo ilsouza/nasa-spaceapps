@@ -1,0 +1,18 @@
+program CollabMoon;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  FMain in 'src\FMain.pas' {frmMain},
+  FUser.Login in 'src\FUser.Login.pas' {frmUserLogin},
+  FUser.Register in 'src\FUser.Register.pas' {frmUserRegister};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TfrmUserLogin, frmUserLogin);
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TfrmUserRegister, frmUserRegister);
+  Application.Run;
+end.

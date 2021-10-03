@@ -1,0 +1,5 @@
+object srvLaboratories: TsrvLaboratories
+  OldCreateOrder = False
+  Height = 300
+  Width = 600
+end

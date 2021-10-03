@@ -1,0 +1,13 @@
+object dm: Tdm
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 377
+  Width = 440
+  object emsLAPProvider: TEMSProvider
+    ApiVersion = '2'
+    URLHost = '2d90d78d.ngrok.io'
+    URLPort = 8080
+    Left = 72
+    Top = 40
+  end
+end

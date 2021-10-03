@@ -1,0 +1,51 @@
+package serverquiz;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$RUNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  dbrtl,
+  FireDAC,
+  FireDACCommonDriver,
+  FireDACCommon,
+  FireDACPgDriver,
+  emsserverapi;
+
+contains
+  uResQuiz in 'src\resources\uResQuiz.pas' {resQuiz: TDataModule},
+  uResQuizAction in 'src\resources\uResQuizAction.pas' {resQuizAction: TDataModule},
+  uResUsers in 'src\resources\uResUsers.pas' {resUsers: TDataModule},
+  uDM in 'src\services\uDM.pas' {dm: TDataModule},
+  uDMQuestions in 'src\services\uDMQuestions.pas' {dmQuestions: TDataModule},
+  uDMQuiz in 'src\services\uDMQuiz.pas' {dmQuiz: TDataModule},
+  uDMQuizActions in 'src\services\uDMQuizActions.pas' {dmQuizActions: TDataModule},
+  uDMUsers in 'src\services\uDMUsers.pas' {dmUsers: TDataModule},
+  uResQuestions in 'src\resources\uResQuestions.pas' {resQuestions: TDataModule};
+
+end.

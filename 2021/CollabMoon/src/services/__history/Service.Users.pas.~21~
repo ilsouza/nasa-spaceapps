@@ -1,0 +1,938 @@
+unit Service.Users;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  System.JSON,
+  System.UITypes,
+  System.DateUtils,
+  System.Variants,
+  System.StrUtils,
+  System.MaskUtils,
+  UDM,
+  REST.Backend.ServiceTypes,
+  REST.Client,
+  Data.Bind.Components,
+  Data.Bind.ObjectScope,
+  REST.Backend.EndPoint,
+  REST.Types,
+  USharedConsts,
+  USharedUtils,
+  USharedProperties,
+  UAppSharedUtils,
+  Interfaces.Avatar.Selection,
+  FMX.Types,
+  FMX.Graphics,
+  FireDAC.Stan.Intf,
+  FireDAC.Stan.Option,
+  FireDAC.Stan.Param,
+  FireDAC.Stan.Error,
+  FireDAC.DatS,
+  FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf,
+  Data.DB,
+  FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client,
+  UJSONHelper,
+  FMX.Dialogs,
+  FMX.DialogService,
+  FMX.Controls,
+  System.Threading,
+  uLibCommon,
+  Classes.AdvJSONObjectWriter,
+  Shared.FireDAC.Utils, REST.Backend.EMSServices;
+
+type
+  TsrvUsers = class(TDataModule, IServiceGetAvatar, IServiceSendAvatar)
+    BackEndpointUsers: TBackendEndpoint;
+    rRespUsers: TRESTResponse;
+    mTblUserProfile: TFDMemTable;
+    BackEndpointGetItem: TBackendEndpoint;
+    rRespGetItem: TRESTResponse;
+    mTblUserProfileuser_nid: TIntegerField;
+    mTblUserProfileuser_cname: TStringField;
+    mTblUserProfileuser_cdocnumber: TStringField;
+    mTblUserProfileuser_cphone: TStringField;
+    mTblUserProfileuser_egender: TStringField;
+    BackEndpointPutItem: TBackendEndpoint;
+    rRespPutItem: TRESTResponse;
+    mTblUserProfileuser_dbirthdate: TDateTimeField;
+    BackEndpointPostItem: TBackendEndpoint;
+    rRespPostItem: TRESTResponse;
+    mTblUserAddress: TFDMemTable;
+    mTblUserAddressaddr_nid: TIntegerField;
+    mTblUserAddressuser_nid: TIntegerField;
+    mTblUserAddressaddr_etype: TStringField;
+    mTblUserAddressaddr_cpublicplace: TStringField;
+    mTblUserAddressaddr_nnumber: TIntegerField;
+    mTblUserAddressaddr_cunit: TStringField;
+    mTblUserAddressaddr_cdistrict: TStringField;
+    mTblUserAddressaddr_ccity: TStringField;
+    mTblUserAddressaddr_cstate: TStringField;
+    mTblUserAddressaddr_cpostalcode: TStringField;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure DataModuleDestroy(Sender: TObject);
+    procedure mTblUserProfileUpdateRecord(ASender: TDataSet; ARequest: TFDUpdateRequest; var AAction: TFDErrorAction;
+      AOptions: TFDUpdateRowOptions);
+  private
+    { Private declarations }
+    FDM: TDM;
+    FUserAddressHashController: TDataSetHashController;
+    procedure ResetBackEndpoint(ABackEndpoint: TBackendEndpoint);
+    procedure ShowWarning(const AMessage: string; ATargetControl: TFmxObject);
+  public
+    { Public declarations }
+    function GetAvatarFileName(AUserID: Integer): string;
+    function GetAvatar(AUserID: Integer): string;
+    function GetUserProfile(AUserID: Integer): Boolean;
+    procedure GetUserAddress(const AUserID: Integer; var ADataSet: TFDMemTable);
+    function ValidateUserProfile: Boolean;
+    function ValidateUserAddress: Boolean;
+    procedure PutAvatar(AImageFile: string; ACaller: TFmxObject);
+    procedure DoChangeUserGender(const AValue: string);
+    procedure DoPostUserProfile(const AApplyUpdates: Boolean);
+    procedure DoPostUserAddress(var ADataSet: TFDMemTable);
+    procedure DoUpdateUserProfile;
+    procedure DoUpdateUserAddress;
+    procedure DoInsertUserAddress(var ADataSet: TFDMemTable);
+  end;
+
+const
+  EMS_GET_ITEM_PARAM_NAME = 'RequestedItem';
+  EMS_GET_ITEM_PARAM_VALUE_AVATAR = 'Avatar';
+  EMS_GET_ITEM_PARAM_VALUE_PROFILE = 'Profile';
+  EMS_GET_ITEM_PARAM_VALUE_ADDRESS = 'Address';
+  EMS_PUT_ITEM_PARAM_NAME_ID = 'id';
+  EMS_PUT_ITEM_PARAM_NAME_DATATYPE = 'datatype';
+  EMS_PUT_ITEM_PARAM_VALUE_PROFILE = 'Profile';
+  EMS_PUT_ITEM_PARAM_VALUE_ADDRESS = 'Address';
+
+var
+  srvUsers: TsrvUsers;
+
+implementation
+
+uses
+  Storage.Chronos,
+  FUser.Profile;
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+{$R *.dfm}
+
+{ TsrvUsers }
+
+procedure TsrvUsers.ResetBackEndpoint(ABackEndpoint: TBackendEndpoint);
+begin
+  ABackEndpoint.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.None;
+  ABackEndpoint.Params.Clear;
+  ABackEndpoint.ResourceSuffix := EmptyStr;
+end;
+
+procedure TsrvUsers.ShowWarning(const AMessage: string; ATargetControl: TFmxObject);
+begin
+  TDialogService.MessageDialog(
+    AMessage,
+    TMsgDlgType.mtWarning,
+    [TMsgDlgBtn.mbOk],
+    TMsgDlgBtn.mbOk,
+    0,
+    procedure(const AResult: TModalResult)
+    begin
+      if (ATargetControl <> nil) and (ATargetControl is TControl) then
+      begin
+        (ATargetControl as TControl).SetFocus;
+      end;
+    end);
+end;
+
+function TsrvUsers.ValidateUserAddress: Boolean;
+const
+  VALIDATION_STEPS = 4;
+var
+  LResult: Boolean;
+  LValidation: Integer;
+
+{$REGION 'Inner methods'}
+  function _IsDataSetActive: Boolean;
+  begin
+    Result := mTblUserAddress.Active;
+  end;
+
+  function _RequiredFieldsOK: Boolean;
+  begin
+    Result := mTblUserAddressaddr_cpublicplace.AsString <> EmptyStr;
+  end;
+
+  function _PostalCodeIsValid: Boolean;
+  var
+    sPostalCode: string;
+  begin
+    Result := True;
+    if mTblUserAddressaddr_cpostalcode.AsString <> EmptyStr then
+    begin
+      sPostalCode := TSharedUtils.ExtractNumbers(mTblUserAddressaddr_cpostalcode.AsString);
+      Result := (sPostalCode.Length = APP_ADDRESS_POSTALCODE_STRING_SIZE);
+    end;
+  end;
+
+  function _StateIsValid: Boolean;
+  begin
+    Result := True;
+    if mTblUserAddressaddr_cstate.AsString <> EmptyStr then
+    begin
+      Result := (mTblUserAddressaddr_cstate.AsString.Length = APP_ADDRESS_STATE_STRING_SIZE);
+    end;
+  end;
+
+{$ENDREGION}
+
+begin
+  LResult := True;
+  LValidation := 1;
+
+  while LResult and (LValidation <= VALIDATION_STEPS) do
+  begin
+    case LValidation of
+      1:
+        begin
+          LResult := _IsDataSetActive;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_INVALID_DATASET, frmUserProfile.edtTabiAddressPostalCode);
+          end;
+        end;
+      2:
+        begin
+          LResult := _RequiredFieldsOK;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_ADDRESS_PUBLICPLACE_REQUIRED, frmUserProfile.edtTabiAddressPublicPlace);
+          end;
+        end;
+      3:
+        begin
+          LResult := _PostalCodeIsValid;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_ADDRESS_PUBLICPLACE_REQUIRED, frmUserProfile.edtTabiAddressPublicPlace);
+          end;
+        end;
+      4:
+        begin
+          LResult := _StateIsValid;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_ADDRESS_INVALID_STATE, frmUserProfile.edtTabiAddressState);
+          end;
+        end;
+    end;
+
+    Inc(LValidation);
+  end;
+
+  Result := LResult;
+end;
+
+function TsrvUsers.ValidateUserProfile: Boolean;
+const
+  VALIDATION_STEPS = 4;
+var
+  LResult: Boolean;
+  LValidation: Integer;
+
+{$REGION 'Inner methods'}
+  function _IsDataSetActive: Boolean;
+  begin
+    Result := mTblUserProfile.Active;
+  end;
+
+  function _RequiredFieldsOK: Boolean;
+  begin
+    Result := (mTblUserProfileuser_cname.AsString <> EmptyStr) and
+      (mTblUserProfileuser_cdocnumber.AsString <> EmptyStr);
+  end;
+
+  function _DocNumberIsValid: Boolean;
+  begin
+    Result := ValidCPF(mTblUserProfileuser_cdocnumber.AsString);
+  end;
+
+  function _BirthDateIsValid: Boolean;
+  var
+    LMinDate: TDateTime;
+    LMaxDate: TDateTime;
+  begin
+    LMinDate := IncYear(DateOf(Now), -130);
+    LMaxDate := DateOf(Now);
+
+    Result := (mTblUserProfileuser_dbirthdate.AsString <> '') or
+      ((mTblUserProfileuser_dbirthdate.AsDateTime >= LMinDate) and
+      (mTblUserProfileuser_dbirthdate.AsDateTime <= LMaxDate));
+  end;
+{$ENDREGION}
+
+begin
+  LResult := True;
+  LValidation := 1;
+
+  while LResult and (LValidation <= VALIDATION_STEPS) do
+  begin
+    case LValidation of
+      1:
+        begin
+          LResult := _IsDataSetActive;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_INVALID_DATASET, frmUserProfile.edtTabProfileFullName);
+          end;
+        end;
+      2:
+        begin
+          LResult := _RequiredFieldsOK;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_USER_NAME_AND_DOCNUMBER_REQUIRED, frmUserProfile.edtTabProfileFullName);
+          end;
+        end;
+      3:
+        begin
+          LResult := _DocNumberIsValid;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_INVALID_DOCUMENT_NUMBER, frmUserProfile.edtTabProfileDocNumber);
+          end;
+        end;
+      4:
+        begin
+          LResult := _BirthDateIsValid;
+          if not LResult then
+          begin
+            ShowWarning(WARNING_INVALID_BIRTHDATE, nil);
+          end;
+        end;
+    end;
+
+    Inc(LValidation);
+  end;
+
+  Result := LResult;
+end;
+
+procedure TsrvUsers.DataModuleCreate(Sender: TObject);
+begin
+  FDM := TDM.Create(nil);
+
+  FUserAddressHashController := TDataSetHashController.Create;
+  FUserAddressHashController.DataSet := mTblUserAddress;
+
+  TAppSharedUtils.SetProvider(TDataModule(Self), FDM.emsLAPProvider);
+end;
+
+procedure TsrvUsers.DataModuleDestroy(Sender: TObject);
+begin
+  if Assigned(FDM) then
+  begin
+    FDM.DisposeOf;
+  end;
+
+  FUserAddressHashController.DisposeOf;
+end;
+
+procedure TsrvUsers.DoChangeUserGender(const AValue: string);
+begin
+  if mTblUserProfile.Active then
+  begin
+    mTblUserProfile.Edit;
+    mTblUserProfileuser_egender.AsString := AValue;
+    mTblUserProfile.Post;
+  end;
+end;
+
+procedure TsrvUsers.DoInsertUserAddress(var ADataSet: TFDMemTable);
+var
+  LAdvJSONObjectWriter: IAdvJSONObjectWriter;
+  LJSONResponse: TJSONObject;
+  LTask: ITask;
+  LThread: TThread;
+  LAddrID: Integer;
+  LDataSet: TFDMemTable;
+begin
+  LTask := TTask.Create(
+    procedure()
+    begin
+      LAdvJSONObjectWriter := TAdvJSONObjectWriter.Create;
+      LAdvJSONObjectWriter.AddStringPair('user_nid', mTblUserAddressuser_nid.AsString);
+
+      if mTblUserAddressaddr_cpostalcode.AsString <> EmptyStr then
+      begin
+        LAdvJSONObjectWriter.AddStringPair('addr_cpostalcode',
+          TSharedUtils.ExtractNumbers(mTblUserAddressaddr_cpostalcode.AsString));
+      end;
+
+      LAdvJSONObjectWriter.AddStringPair('addr_cpublicplace', mTblUserAddressaddr_cpublicplace.AsString);
+
+      if mTblUserAddressaddr_nnumber.AsString <> EmptyStr then
+      begin
+        LAdvJSONObjectWriter.AddIntegerPair('addr_nnumber', mTblUserAddressaddr_nnumber.AsInteger);
+      end;
+
+      LAdvJSONObjectWriter.AddStringPair('addr_cunit', mTblUserAddressaddr_cunit.AsString);
+
+      LAdvJSONObjectWriter.AddStringPair('addr_cdistrict', mTblUserAddressaddr_cdistrict.AsString);
+
+      LAdvJSONObjectWriter.AddStringPair('addr_ccity', mTblUserAddressaddr_ccity.AsString);
+
+      LAdvJSONObjectWriter.AddStringPair('addr_cstate', mTblUserAddressaddr_cstate.AsString);
+
+      ResetBackEndpoint(BackEndpointPostItem);
+
+      BackEndpointPostItem.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.None;
+      BackEndpointPostItem.Accept := EMS_APPLICATION_JSON;
+
+      BackEndpointPostItem.AddParameter(
+        EMS_PUT_ITEM_PARAM_NAME_DATATYPE,
+        EMS_PUT_ITEM_PARAM_VALUE_ADDRESS,
+        TRESTRequestParameterKind.pkHTTPHEADER);
+
+      BackEndpointPostItem.Body.Add(LAdvJSONObjectWriter.AsJSONObject);
+
+      try
+        BackEndpointPostItem.Execute;
+      finally
+        if rRespPostItem.StatusCode <> HTTP_SUCCESSFUL_REQUEST then
+        begin
+          TThread.Synchronize(
+            LThread,
+            procedure()
+            begin
+              TDialogService.MessageDialog(
+                ERROR_ON_INSERT_OPERATION,
+                TMsgDlgType.mtError,
+                [TMsgDlgBtn.mbOk],
+                TMsgDlgBtn.mbOk,
+                0,
+                procedure(const AResult: TModalResult)begin
+                  TAppSharedUtils.HideActivityIndicator;
+                end);
+            end);
+        end
+        else
+        begin
+          LJSONResponse := TJSONObject.ParseJSONValue(rRespPostItem.JSONText) as TJSONObject;
+          try
+            if TryStrToInt(LJSONResponse.GetValue('AddrID').Value, LAddrID) then
+            begin
+              mTblUserAddress.Edit;
+              mTblUserAddressaddr_nid.AsInteger := LAddrID;
+              LDataSet.CopyRecord(mTblUserAddress);
+            end;
+            FUserAddressHashController.DoSyncHash;
+          finally
+            LJSONResponse.DisposeOf;
+          end;
+
+          TAppSharedUtils.HideActivityIndicator;
+        end;
+
+        mTblUserProfile.Edit;
+      end;
+    end);
+
+  TAppSharedUtils.ShowActivityIndicator(frmUserProfile);
+  LThread := TThread.CurrentThread;
+  LDataSet := ADataSet;
+  LTask.Start;
+end;
+
+procedure TsrvUsers.DoPostUserAddress(var ADataSet: TFDMemTable);
+begin
+  if not (mTblUserAddress.State in dsEditModes) then
+  begin
+    mTblUserAddress.Edit;
+  end;
+
+  mTblUserAddress.CopyRecord(ADataSet);
+
+  if FUserAddressHashController.CurrentHash <> FUserAddressHashController.SyncHash then
+  begin
+    if ValidateUserAddress then
+    begin
+      if mTblUserAddressaddr_nid.AsInteger > 0 then
+      begin
+        DoUpdateUserAddress;
+      end
+      else
+      begin
+        DoInsertUserAddress(ADataSet);
+      end;
+    end;
+  end
+  else
+  begin
+    TThread.Synchronize(
+      TThread.CurrentThread,
+      procedure()
+      begin
+        TDialogService.MessageDialog(
+          WARNING_NO_UPDATES_PENDING,
+          TMsgDlgType.mtWarning,
+          [TMsgDlgBtn.mbOk],
+          TMsgDlgBtn.mbOk,
+          0,
+          procedure(const AResult: TModalResult)
+          begin
+            frmUserProfile.Focused := nil;
+            frmUserProfile.Close;
+            // frmUserProfile.edtTabiAddressFocusHelper.SetFocus;
+          end)
+      end);
+  end;
+end;
+
+procedure TsrvUsers.DoPostUserProfile(const AApplyUpdates: Boolean);
+begin
+  if (mTblUserProfile.State in dsEditModes) then
+  begin
+    mTblUserProfile.Post;
+
+    if AApplyUpdates then
+      frmUserProfile.Close
+    else
+      mTblUserProfile.Edit;
+  end;
+
+(*
+  else
+  begin
+    TThread.Synchronize(
+      TThread.CurrentThread,
+      procedure()
+      begin
+        TDialogService.MessageDialog(WARNING_NO_UPDATES_PENDING, TMsgDlgType.mtWarning,
+                                     [TMsgDlgBtn.mbOk], TMsgDlgBtn.mbOk, 0,
+
+          procedure(const AResult: TModalResult)
+          begin
+            frmUserProfile.Focused := nil;
+            frmUserProfile.Close;
+            // frmUserProfile.edtTabProfileFocusHelper.SetFocus;
+          end)
+      end);
+  end;
+*)
+
+  if AApplyUpdates and mTblUserProfile.UpdatesPending then
+  begin
+    mTblUserProfile.ApplyUpdates;
+  end;
+
+  frmUserProfile.Close;
+end;
+
+procedure TsrvUsers.DoUpdateUserAddress;
+var
+  LAdvJSONObjectWriter: IAdvJSONObjectWriter;
+  LTask: ITask;
+  LThread: TThread;
+begin
+  LTask := TTask.Create(
+    procedure()
+    begin
+      LAdvJSONObjectWriter := TAdvJSONObjectWriter.Create;
+      LAdvJSONObjectWriter.AddIntegerPair('addr_nid', mTblUserAddressaddr_nid.AsInteger);
+      LAdvJSONObjectWriter.AddStringPair('addr_cpostalcode', mTblUserAddressaddr_cpostalcode.AsString);
+      LAdvJSONObjectWriter.AddStringPair('addr_cpublicplace', mTblUserAddressaddr_cpublicplace.AsString);
+
+      if mTblUserAddressaddr_nnumber.AsString <> EmptyStr then
+      begin
+        LAdvJSONObjectWriter.AddIntegerPair('addr_nnumber', mTblUserAddressaddr_nnumber.AsInteger);
+      end;
+
+      LAdvJSONObjectWriter.AddStringPair('addr_cunit', mTblUserAddressaddr_cunit.AsString);
+      LAdvJSONObjectWriter.AddStringPair('addr_cdistrict', mTblUserAddressaddr_cdistrict.AsString);
+      LAdvJSONObjectWriter.AddStringPair('addr_ccity', mTblUserAddressaddr_ccity.AsString);
+      LAdvJSONObjectWriter.AddStringPair('addr_cstate', mTblUserAddressaddr_cstate.AsString);
+
+      ResetBackEndpoint(BackEndpointPutItem);
+
+      BackEndpointPutItem.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.None;
+      BackEndpointPutItem.Accept := EMS_APPLICATION_JSON;
+
+      BackEndpointPutItem.AddParameter(
+        EMS_PUT_ITEM_PARAM_NAME_ID,
+        mTblUserAddressuser_nid.AsString,
+        TRESTRequestParameterKind.pkHTTPHEADER);
+
+      BackEndpointPutItem.AddParameter(
+        EMS_PUT_ITEM_PARAM_NAME_DATATYPE,
+        EMS_PUT_ITEM_PARAM_VALUE_ADDRESS,
+        TRESTRequestParameterKind.pkHTTPHEADER);
+
+      BackEndpointPutItem.Body.Add(LAdvJSONObjectWriter.AsJSONObject);
+
+      try
+        BackEndpointPutItem.Execute;
+      finally
+        if rRespPutItem.StatusCode <> HTTP_SUCCESSFUL_REQUEST then
+        begin
+          TThread.Synchronize(
+            LThread,
+            procedure()
+            begin
+              TDialogService.MessageDialog(
+                ERROR_ON_UPDATE_OPERATION,
+                TMsgDlgType.mtError,
+                [TMsgDlgBtn.mbOk],
+                TMsgDlgBtn.mbOk,
+                0,
+                procedure(const AResult: TModalResult)
+                begin
+                  TAppSharedUtils.HideActivityIndicator;
+                end);
+            end);
+        end
+        else
+        begin
+          FUserAddressHashController.DoSyncHash;
+          TAppSharedUtils.HideActivityIndicator;
+        end;
+
+        mTblUserProfile.Edit;
+      end;
+    end);
+
+  TAppSharedUtils.ShowActivityIndicator(frmUserProfile);
+  LThread := TThread.CurrentThread;
+  LTask.Start;
+end;
+
+procedure TsrvUsers.DoUpdateUserProfile;
+var
+  LJSONObject: TJSONObject;
+  LTask: ITask;
+  LThread: TThread;
+begin
+  if ValidateUserProfile then
+  begin
+    LTask := TTask.Create(
+      procedure()
+      begin
+//        try
+//          FormatSettings.ShortDateFormat := 'mm/dd/yyyy';
+          LJSONObject := mTblUserProfile.AsJSONObject;
+//        finally
+//          FormatSettings.ShortDateFormat := 'mm/dd/yyyy';
+//        end;
+
+        ResetBackEndpoint(BackEndpointPutItem);
+
+        BackEndpointPutItem.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.None;
+        BackEndpointPutItem.Accept          := EMS_APPLICATION_JSON;
+
+        BackEndpointPutItem.AddParameter(
+          EMS_PUT_ITEM_PARAM_NAME_ID,
+          mTblUserProfileuser_nid.AsString,
+          TRESTRequestParameterKind.pkHTTPHEADER);
+
+        BackEndpointPutItem.AddParameter(
+          EMS_PUT_ITEM_PARAM_NAME_DATATYPE,
+          EMS_PUT_ITEM_PARAM_VALUE_PROFILE,
+          TRESTRequestParameterKind.pkHTTPHEADER);
+
+        BackEndpointPutItem.Body.Add(LJSONObject);
+
+        try
+          BackEndpointPutItem.Execute;
+        finally
+          if rRespPutItem.StatusCode <> HTTP_SUCCESSFUL_REQUEST then
+          begin
+            TThread.Synchronize(LThread,
+              procedure()
+              begin
+                TDialogService.MessageDialog(rRespPutItem.ErrorMessage, TMsgDlgType.mtError, [TMsgDlgBtn.mbOk], TMsgDlgBtn.mbOk, 0,
+                  procedure(const AResult: TModalResult)
+                  begin
+                    TAppSharedUtils.HideActivityIndicator;
+                  end);
+              end);
+          end
+          else
+          begin
+            TAppSharedUtils.HideActivityIndicator;
+          end;
+
+          mTblUserProfile.Edit;
+        end;
+      end);
+
+    TAppSharedUtils.ShowActivityIndicator(frmUserProfile);
+    LThread := TThread.CurrentThread;
+    LTask.Start;
+  end;
+end;
+
+function TsrvUsers.GetAvatar(AUserID: Integer): string;
+var
+  sAvatarFileName: string;
+  sAvatarFile: string;
+  LStream: TMemoryStream;
+begin
+  Result := EmptyStr;
+
+  sAvatarFileName := GetAvatarFileName(AUserID);
+
+  if (sAvatarFileName <> EmptyStr) then
+  begin
+    if FileExists(sAvatarFileName) then
+    begin
+      Result := sAvatarFileName;
+    end
+    else
+    begin
+      sAvatarFile := ExtractFileName(sAvatarFileName);
+
+      ResetBackEndpoint(BackEndpointUsers);
+
+      BackEndpointUsers.Accept := EMS_IMAGE_JPEG;
+
+      BackEndpointUsers.Method := TRESTRequestMethod.rmGET;
+
+      BackEndpointUsers.AddParameter('id', AUserID.ToString, TRESTRequestParameterKind.pkHTTPHEADER);
+      BackEndpointUsers.AddParameter('filename', sAvatarFile, TRESTRequestParameterKind.pkHTTPHEADER);
+      BackEndpointUsers.Execute;
+
+      if rRespUsers.StatusCode = 200 then
+      begin
+        LStream := TMemoryStream.Create;
+        try
+          LStream.Write(BackEndpointUsers.Response.RawBytes, Length(BackEndpointUsers.Response.RawBytes));
+          if LStream.Size > 0 then
+          begin
+            LStream.SaveToFile(sAvatarFileName);
+            Result := sAvatarFileName;
+          end;
+        finally
+          LStream.DisposeOf;
+        end;
+      end;
+    end;
+  end;
+end;
+
+function TsrvUsers.GetAvatarFileName(AUserID: Integer): string;
+var
+  sAvatar: string;
+  LJSONObject: TJSONObject;
+begin
+  Result := EmptyStr;
+
+  ResetBackEndpoint(BackEndpointUsers);
+
+  BackEndpointUsers.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.ClientErrorNotFound_404;
+  BackEndpointUsers.Accept := EMS_APPLICATION_JSON;
+  BackEndpointUsers.Method := TRESTRequestMethod.rmGET;
+  BackEndpointUsers.ResourceSuffix := IntToStr(AUserID);
+  BackEndpointUsers.AddParameter(
+    EMS_GET_ITEM_PARAM_NAME,
+    EMS_GET_ITEM_PARAM_VALUE_AVATAR,
+    TRESTRequestParameterKind.pkHTTPHEADER);
+
+  BackEndpointUsers.Execute;
+
+  if rRespUsers.StatusCode = HTTP_SUCCESSFUL_REQUEST then
+  begin
+    LJSONObject := TJSONObject.ParseJSONValue(rRespUsers.JSONText) as TJSONObject;
+    try
+      if LJSONObject.TryGetValue<string>('user_cavatar', sAvatar) then
+      begin
+        sAvatar := sAvatar.DeQuotedString('"');
+        Result := TSharedProperties.ImageDir + sAvatar;
+      end;
+    finally
+      LJSONObject.DisposeOf;
+    end;
+  end;
+end;
+
+procedure TsrvUsers.GetUserAddress(const AUserID: Integer; var ADataSet: TFDMemTable);
+var
+  LJSONObject: TJSONObject;
+begin
+  ResetBackEndpoint(BackEndpointGetItem);
+
+  BackEndpointGetItem.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.ClientErrorNotFound_404;
+  BackEndpointGetItem.Accept := EMS_APPLICATION_JSON;
+
+  BackEndpointGetItem.ResourceSuffix := AUserID.ToString;
+  BackEndpointGetItem.AddParameter(
+    EMS_GET_ITEM_PARAM_NAME,
+    EMS_GET_ITEM_PARAM_VALUE_ADDRESS,
+    TRESTRequestParameterKind.pkHTTPHEADER);
+
+  ADataSet.Close;
+  ADataSet.Open;
+  ADataSet.Edit;
+
+  mTblUserAddress.Close;
+  mTblUserAddress.Open;
+
+  try
+    BackEndpointGetItem.Execute;
+
+    if rRespGetItem.StatusCode = HTTP_SUCCESSFUL_REQUEST then
+    begin
+      LJSONObject := TJSONObject.ParseJSONValue(rRespGetItem.JSONText) as TJSONObject;
+      try
+        mTblUserAddress.InsertFromJSON(LJSONObject);
+      finally
+        LJSONObject.DisposeOf;
+      end;
+    end
+    else
+    begin
+      mTblUserAddress.Edit;
+      mTblUserAddressuser_nid.AsInteger := AUserID;
+    end;
+  finally
+    ADataSet.CopyRecord(mTblUserAddress);
+
+    if not (mTblUserAddress.State in dsEditModes) then
+    begin
+      mTblUserAddress.Edit;
+    end;
+
+    FUserAddressHashController.DoSyncHash;
+  end;
+end;
+
+function TsrvUsers.GetUserProfile(AUserID: Integer): Boolean;
+var
+  LJSONObject: TJSONObject;
+begin
+  Result := False;
+
+  ResetBackEndpoint(BackEndpointGetItem);
+
+  BackEndpointGetItem.AllowHTTPErrors := TCustomBackendEndpoint.TAllowHTTPErrors.ClientErrorNotFound_404;
+  BackEndpointGetItem.Accept := EMS_APPLICATION_JSON;
+
+  BackEndpointGetItem.ResourceSuffix := AUserID.ToString;
+  BackEndpointGetItem.AddParameter(
+    EMS_GET_ITEM_PARAM_NAME,
+    EMS_GET_ITEM_PARAM_VALUE_PROFILE,
+    TRESTRequestParameterKind.pkHTTPHEADER);
+
+  BackEndpointGetItem.Execute;
+
+  if rRespGetItem.StatusCode = HTTP_SUCCESSFUL_REQUEST then
+  begin
+    LJSONObject := TJSONObject.ParseJSONValue(rRespGetItem.JSONText) as TJSONObject;
+    try
+      mTblUserProfile.Close;
+      mTblUserProfile.Open;
+      mTblUserProfile.InsertFromJSON(LJSONObject);
+      mTblUserProfile.ApplyUpdates;
+      mTblUserProfile.Edit;
+      Result := True;
+    finally
+      LJSONObject.DisposeOf;
+    end;
+
+    Chronos.SetItem<Boolean>(USER_PROFILE_CHANGE_GENDER, True);
+  end;
+end;
+
+procedure TsrvUsers.mTblUserProfileUpdateRecord(ASender: TDataSet; ARequest: TFDUpdateRequest;
+var AAction: TFDErrorAction; AOptions: TFDUpdateRowOptions);
+var
+  iField: Integer;
+  bChanged: Boolean;
+begin
+  bChanged := False;
+
+  if ARequest = arUpdate then
+  begin
+    for iField := 0 to Pred(ASender.FieldCount) do
+    begin
+      if ASender.Fields[iField].Value <> ASender.Fields[iField].OldValue then
+      begin
+        bChanged := True;
+        Break;
+      end;
+    end;
+
+    if bChanged then
+    begin
+      DoUpdateUserProfile;
+    end
+    else
+    begin
+      TThread.Synchronize(
+        TThread.CurrentThread,
+        procedure()
+        begin
+          TDialogService.MessageDialog(
+            WARNING_NO_UPDATES_PENDING,
+            TMsgDlgType.mtWarning,
+            [TMsgDlgBtn.mbOk],
+            TMsgDlgBtn.mbOk,
+            0,
+            procedure(const AResult: TModalResult)
+            begin
+              frmUserProfile.Focused := nil;
+              frmUserProfile.Close;
+              // frmUserProfile.edtTabProfileFocusHelper.SetFocus;
+            end)
+        end);
+    end;
+  end;
+end;
+
+procedure TsrvUsers.PutAvatar(AImageFile: string; ACaller: TFmxObject);
+var
+  LImageFile: TFileStream;
+  LStream: TMemoryStream;
+  LClientAvatarDisplay: IClientAvatarDisplay;
+  iUserID: Integer;
+begin
+  if Chronos.TryGetItem<Integer>(APP_USER_ID, iUserID) and FileExists(AImageFile) then
+  begin
+    ResetBackEndpoint(BackEndpointUsers);
+
+    BackEndpointUsers.Accept := EMS_IMAGE_JPEG;
+    BackEndpointUsers.Method := TRESTRequestMethod.rmPUT;
+
+    LImageFile := TFileStream.Create(AImageFile, fmOpenRead);
+    try
+      LStream := TMemoryStream.Create;
+      LStream.CopyFrom(LImageFile, 0);
+      try
+        BackEndpointUsers.AddBody(LStream, TRESTContentType.ctIMAGE_JPEG);
+
+        BackEndpointUsers.AddParameter('id', iUserID.ToString, TRESTRequestParameterKind.pkHTTPHEADER);
+        BackEndpointUsers.AddParameter('filename', ExtractFileName(AImageFile), TRESTRequestParameterKind.pkHTTPHEADER);
+
+        BackEndpointUsers.Execute;
+
+        if rRespUsers.StatusCode = 200 then
+        begin
+          Chronos.SetItem<Boolean>(APP_AVATAR_CHANGED, True);
+
+          if Supports(ACaller, IClientAvatarDisplay, LClientAvatarDisplay) then
+          begin
+            LClientAvatarDisplay.LoadAvatar(AImageFile);
+          end;
+        end;
+      finally
+        LStream.DisposeOf;
+      end;
+    finally
+      LImageFile.DisposeOf;
+    end;
+  end;
+end;
+
+end.

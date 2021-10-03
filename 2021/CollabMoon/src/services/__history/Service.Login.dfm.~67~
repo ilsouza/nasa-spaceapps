@@ -1,0 +1,47 @@
+object srvServiceLogin: TsrvServiceLogin
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Height = 465
+  Width = 553
+  object rRespSendEmail: TRESTResponse
+    Left = 224
+    Top = 192
+  end
+  object backEndPointSendEmail: TBackendEndpoint
+    Provider = dm.emsLAPProvider
+    Method = rmPOST
+    Params = <>
+    Resource = 'resSendEmail'
+    Response = rRespSendEmail
+    Left = 104
+    Top = 192
+  end
+  object rRespPassword: TRESTResponse
+    Left = 224
+    Top = 128
+  end
+  object backEndPointPassword: TBackendEndpoint
+    Provider = dm.emsLAPProvider
+    Method = rmPOST
+    Params = <>
+    Resource = 'resPassword'
+    Response = rRespPassword
+    Left = 104
+    Top = 128
+  end
+  object rRespLogin: TRESTResponse
+    ContentType = 'application/json'
+    Left = 224
+    Top = 64
+  end
+  object backEndPointLogin: TBackendEndpoint
+    Provider = dm.emsLAPProvider
+    Method = rmPOST
+    Params = <>
+    Resource = 'resLogin'
+    Response = rRespLogin
+    Left = 104
+    Top = 64
+  end
+end

@@ -1,0 +1,56 @@
+unit UDM;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  REST.Backend.EMSProvider;
+type
+  Tdm = class(TDataModule)
+    emsLAPProvider: TEMSProvider;
+    procedure DataModuleCreate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dm: Tdm;
+
+implementation
+
+uses
+  uAdvIniFile;
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure Tdm.DataModuleCreate(Sender: TObject);
+begin
+  { Para debugar com o EMSDevServerCommand o Linux, usar as configurações abaixo: }
+//  emsLAPProvider.URLBasePath := '';
+
+  { Para executar normalmente com o Apache}
+  emsLAPProvider.URLBasePath := 'ems-server';
+
+  {Execução pelo Apache}
+  emsLAPProvider.URLHost     := 'lapp.uniware.com.br';
+  emsLAPProvider.URLProtocol := 'https';
+  emsLAPProvider.URLPort     := 443;
+
+  {Chamada pelo ngrok}
+//  emsLAPProvider.URLHost     := '8f988fa3.ngrok.io';
+//  emsLAPProvider.URLProtocol := 'https';
+//  emsLAPProvider.URLPort     := 443;
+
+(*
+  emsLAPProvider.URLBasePath := AdvIniFile.Read('EMSProvider', 'URLBasePath', '').AsString;
+  emsLAPProvider.URLHost     := AdvIniFile.Read('EMSProvider', 'URLHost', 'lapp.uniware.com.br').AsString;
+  emsLAPProvider.URLPort     := AdvIniFile.Read('EMSProvider', 'URLPort', 443).AsInteger;
+*)
+end;
+
+end.
